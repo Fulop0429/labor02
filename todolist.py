@@ -33,7 +33,7 @@ class TodoListApp:
 
     def add_task(self):
         task = simpledialog.askstring("Hozzáadás", "Adja meg a teendőt:")
-        due_date = simpledialog.askstring("Hozzáadás", "Adja meg a lejárati dátumot (YYYY-MM-DD):")
+        due_date = simpledialog.askstring("Hozzáadás", "Adja meg a lejárati dátumot a következő formában: YYYY-MM-DD")
 
         if task and due_date:
             self.todo_list.append(TodoItem(task, due_date))
