@@ -1,2 +1,2 @@
 # labor02
-Gyakorlat
+Fülöp Tamás Bálint - CRVQRL
