@@ -1,62 +1,68 @@
 import tkinter as tk
-from datetime import datetime  # datetime modul importálása
+from tkinter import simpledialog, messagebox
+from datetime import datetime
 
 
-class TodoList:
+class TodoItem:
+    def __init__(self, task, due_date):
+        self.task = task
+        self.due_date = due_date
+
+
+class TodoListApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("To-Do List")
+        self.root.title("To-Do List App")
+        self.todo_list = []
 
-        self.tasks = []
+        # Eseménykezelés: gombnyomásra hozzáadás
+        self.add_button = tk.Button(root, text="Hozzáadás", command=self.add_task)
+        self.add_button.pack()
 
-        self.task_entry = tk.Entry(self.root, width=30)
-        self.task_entry.grid(row=0, column=0, padx=10, pady=10)
+        # Lista megjelenítése
+        self.listbox = tk.Listbox(root)
+        self.listbox.pack()
 
-        self.add_button = tk.Button(self.root, text="Hozzáadás", command=self.add_task)
-        self.add_button.grid(row=0, column=1, padx=10, pady=10)
+        # Eseménykezelés: kijelölés törlése
+        self.delete_button = tk.Button(root, text="Kijelölt törlése", command=self.delete_selected)
+        self.delete_button.pack()
 
-        self.task_listbox = tk.Listbox(self.root, width=40, height=10)
-        self.task_listbox.grid(row=1, column=0, columnspan=2, padx=10, pady=10)
-
-        self.remove_button = tk.Button(self.root, text="Törlés", command=self.remove_task)
-        self.remove_button.grid(row=2, column=0, padx=10, pady=10)
-
-        self.task_count_label = tk.Label(self.root, text="Feladatok száma: 0")
-        self.task_count_label.grid(row=2, column=1, padx=10, pady=10)
+        # Eseménykezelés: lejárati dátum ellenőrzése
+        self.check_button = tk.Button(root, text="Lejárati dátum ellenőrzése", command=self.check_due_dates)
+        self.check_button.pack()
 
     def add_task(self):
-        task = self.task_entry.get()
-        if task:
-            now = datetime.now()
-            task_with_timestamp = f"{now.strftime('%Y-%m-%d %H:%M:%S')} - {task}"
-            self.tasks.append(task_with_timestamp)
-            self.update_task_listbox()
-            self.task_entry.delete(0, tk.END)
-            self.update_task_count()
+        task = simpledialog.askstring("Hozzáadás", "Adja meg a teendőt:")
+        due_date = simpledialog.askstring("Hozzáadás", "Adja meg a lejárati dátumot (YYYY-MM-DD):")
 
-    def remove_task(self):
-        selected_index = self.task_listbox.curselection()
+        if task and due_date:
+            self.todo_list.append(TodoItem(task, due_date))
+            self.listbox.insert(tk.END, task)
+
+    def delete_selected(self):
+        selected_index = self.listbox.curselection()
         if selected_index:
-            selected_index = int(selected_index[0])
-            del self.tasks[selected_index]
-            self.update_task_listbox()
-            self.update_task_count()
+            index = selected_index[0]
+            del self.todo_list[index]
+            self.listbox.delete(index)
 
-    def update_task_listbox(self):
-        self.task_listbox.delete(0, tk.END)
-        for task in self.tasks:
-            self.task_listbox.insert(tk.END, task)
+    def check_due_dates(self):
+        today = datetime.today().date()
+        overdue_tasks = []
+        for item in self.todo_list:
+            due_date = datetime.strptime(item.due_date, "%Y-%m-%d").date()
+            if due_date < today:
+                overdue_tasks.append(item.task)
 
-    def update_task_count(self):
-        count = len(self.tasks)
-        self.task_count_label.config(text="Feladatok száma: {}".format(count))
+        if overdue_tasks:
+            message = "Lejárt határidős teendők:\n" + "\n".join(overdue_tasks)
+        else:
+            message = "Nincs lejárt határidős teendő."
 
-
-def main():
-    root = tk.Tk()
-    app = TodoList(root)
-    root.mainloop()
+        messagebox.showinfo("Lejárati dátum ellenőrzés", message)
 
 
 if __name__ == "__main__":
-    main()
+    root = tk.Tk()
+    app = TodoListApp(root)
+    root.mainloop()
