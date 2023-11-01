@@ -8,7 +8,6 @@ class TodoItem:
         self.task = task
         self.due_date = due_date
 
-
 class TodoListApp:
     def __init__(self, root):
         self.root = root
@@ -31,9 +30,18 @@ class TodoListApp:
         self.check_button = tk.Button(root, text="Lejárati dátum ellenőrzése", command=self.check_due_dates)
         self.check_button.pack()
 
+        # Fájl mentés és betöltés gomb
+        self.save_button = tk.Button(root, text="Mentés", command=self.save_to_file)
+        self.save_button.pack()
+        self.load_button = tk.Button(root, text="Betöltés", command=self.load_from_file)
+        self.load_button.pack()
+
+        # Betöltjük a teendőket a szöveges fájlból
+        self.load_from_file()
+
     def add_task(self):
         task = simpledialog.askstring("Hozzáadás", "Adja meg a teendőt:")
-        due_date = simpledialog.askstring("Hozzáadás", "Adja meg a lejárati dátumot a következő formában: YYYY-MM-DD")
+        due_date = simpledialog.askstring("Hozzáadás", "Adja meg a lejárati dátumot (YYYY-MM-DD):")
 
         if task and due_date:
             self.todo_list.append(TodoItem(task, due_date))
@@ -61,8 +69,19 @@ class TodoListApp:
 
         messagebox.showinfo("Lejárati dátum ellenőrzés", message)
 
+    def save_to_file(self):
+        with open("todo.txt", "w") as file:
+            for item in self.todo_list:
+                file.write(f"{item.task}\t{item.due_date}\n")
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = TodoListApp(root)
-    root.mainloop()
+    def load_from_file(self):
+        try:
+            with open("todo.txt", "r") as file:
+                for line in file:
+                    task, due_date = line.strip().split("\t")
+                    self.todo_list.append(TodoItem(task, due_date))
+                    self.listbox.insert(tk.END, task)
+        except FileNotFoundError:
+            messagebox.showinfo("Nincs fájl", "Nem található a teendők fájl. Új lista készült.")
+
+
