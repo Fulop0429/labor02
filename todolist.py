@@ -1,12 +1,14 @@
 import tkinter as tk
 from tkinter import simpledialog, messagebox
 from datetime import datetime
+from file_handling import save_to_file, load_from_file
 
 
 class TodoItem:
     def __init__(self, task, due_date):
         self.task = task
         self.due_date = due_date
+
 
 class TodoListApp:
     def __init__(self, root):
@@ -37,7 +39,7 @@ class TodoListApp:
         self.load_button.pack()
 
         # Betöltjük a teendőket a szöveges fájlból
-        self.load_from_file()
+        load_from_file(self.todo_list)
 
     def add_task(self):
         task = simpledialog.askstring("Hozzáadás", "Adja meg a teendőt:")
@@ -70,18 +72,10 @@ class TodoListApp:
         messagebox.showinfo("Lejárati dátum ellenőrzés", message)
 
     def save_to_file(self):
-        with open("todo.txt", "w") as file:
-            for item in self.todo_list:
-                file.write(f"{item.task}\t{item.due_date}\n")
+        save_to_file(self.todo_list)
 
     def load_from_file(self):
-        try:
-            with open("todo.txt", "r") as file:
-                for line in file:
-                    task, due_date = line.strip().split("\t")
-                    self.todo_list.append(TodoItem(task, due_date))
-                    self.listbox.insert(tk.END, task)
-        except FileNotFoundError:
-            messagebox.showinfo("Nincs fájl", "Nem található a teendők fájl. Új lista készült.")
-
-
+        self.listbox.delete(0, tk.END)  # Törlés az előző teendők megjelenítéséhez
+        load_from_file(self.todo_list)
+        for item in self.todo_list:
+            self.listbox.insert(tk.END, item.task)
